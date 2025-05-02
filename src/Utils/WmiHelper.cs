@@ -70,7 +70,7 @@ namespace PowerPlanTools.Utils
         public static bool SetActivePowerPlan(Guid planGuid)
         {
             string query = $"SELECT * FROM Win32_PowerPlan WHERE InstanceID = 'Microsoft:PowerPlan\\\\{{{planGuid.ToString().ToUpper()}}}'";
-            
+
             using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(PowerManagementNamespace, query))
             {
                 foreach (ManagementObject plan in searcher.Get())
@@ -92,16 +92,16 @@ namespace PowerPlanTools.Utils
         public static List<PowerSetting> GetPowerSettings(Guid planGuid, bool includeHidden = false)
         {
             List<PowerSetting> settings = new List<PowerSetting>();
-            
+
             // Get all power settings for the specified plan
             string query = $"SELECT * FROM Win32_PowerSettingDataIndex WHERE InstanceID LIKE 'Microsoft:PowerSettingDataIndex\\\\{{{planGuid.ToString().ToUpper()}}}%'";
-            
+
             using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(PowerManagementNamespace, query))
             {
                 foreach (ManagementObject settingData in searcher.Get())
                 {
                     string instanceId = settingData["InstanceID"] as string;
-                    
+
                     // Extract setting GUID and subgroup GUID from InstanceID
                     // Format: "Microsoft:PowerSettingDataIndex\\{PlanGuid}\\{SubGroupGuid}\\{SettingGuid}"
                     string[] parts = instanceId.Split('\\');
@@ -110,7 +110,7 @@ namespace PowerPlanTools.Utils
 
                     Guid subGroupGuid = ExtractGuidFromPart(parts[3]);
                     Guid settingGuid = ExtractGuidFromPart(parts[4]);
-                    
+
                     // Get setting metadata
                     PowerSetting setting = GetPowerSettingMetadata(settingGuid, subGroupGuid);
                     if (setting == null)
@@ -123,7 +123,7 @@ namespace PowerPlanTools.Utils
                     // Get AC and DC values
                     setting.PluggedIn = settingData["ACSettingIndex"];
                     setting.OnBattery = settingData["DCSettingIndex"];
-                    
+
                     settings.Add(setting);
                 }
             }
@@ -139,32 +139,50 @@ namespace PowerPlanTools.Utils
         /// <returns>A PowerSetting object with metadata</returns>
         private static PowerSetting GetPowerSettingMetadata(Guid settingGuid, Guid subGroupGuid)
         {
+            // First check if the setting is in our known settings dictionary
+            string alias = "Unknown Setting";
+            string description = string.Empty;
+
+            if (ArgumentCompleters.KnownPowerSettings.TryGetValue(settingGuid, out string knownName))
+            {
+                alias = knownName;
+            }
+
+            // Try to get additional metadata from WMI
             string query = $"SELECT * FROM Win32_PowerSetting WHERE InstanceID = 'Microsoft:PowerSetting\\\\{{{settingGuid.ToString().ToUpper()}}}'";
-            
+
             using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(PowerManagementNamespace, query))
             {
                 foreach (ManagementObject settingObj in searcher.Get())
                 {
-                    string elementName = settingObj["ElementName"] as string;
-                    string description = settingObj["Description"] as string;
-                    
-                    PowerSetting setting = new PowerSetting
+                    // Only use WMI name if we don't have a known name
+                    if (!ArgumentCompleters.KnownPowerSettings.ContainsKey(settingGuid))
                     {
-                        Alias = elementName,
-                        SettingGuid = settingGuid,
-                        SubGroupGuid = subGroupGuid,
-                        Description = description,
-                        Units = GetPowerSettingUnits(settingGuid)
-                    };
+                        string elementName = settingObj["ElementName"] as string;
+                        if (!string.IsNullOrEmpty(elementName))
+                        {
+                            alias = elementName;
+                        }
+                    }
 
-                    // Check if setting is hidden
-                    setting.IsHidden = IsHiddenSetting(settingGuid);
-                    
-                    return setting;
+                    description = settingObj["Description"] as string;
+                    break;
                 }
             }
 
-            return null;
+            PowerSetting setting = new PowerSetting
+            {
+                Alias = alias,
+                SettingGuid = settingGuid,
+                SubGroupGuid = subGroupGuid,
+                Description = description,
+                Units = GetPowerSettingUnits(settingGuid)
+            };
+
+            // Check if setting is hidden
+            setting.IsHidden = IsHiddenSetting(settingGuid);
+
+            return setting;
         }
 
         /// <summary>
@@ -174,17 +192,51 @@ namespace PowerPlanTools.Utils
         /// <returns>The units string</returns>
         private static string GetPowerSettingUnits(Guid settingGuid)
         {
+            // First try to get units from WMI
+            string units = string.Empty;
             string query = $"SELECT * FROM Win32_PowerSettingDefinitionData WHERE SettingGuid = '{{{settingGuid.ToString().ToUpper()}}}'";
-            
+
             using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(PowerManagementNamespace, query))
             {
                 foreach (ManagementObject unitObj in searcher.Get())
                 {
-                    return unitObj["UnitSpecifier"] as string;
+                    units = unitObj["UnitSpecifier"] as string;
+                    if (!string.IsNullOrEmpty(units))
+                    {
+                        return units;
+                    }
                 }
             }
 
-            return string.Empty;
+            // If WMI doesn't have units, use our hardcoded mapping
+            switch (settingGuid.ToString().ToLower())
+            {
+                // Display brightness settings
+                case "aded5e82-b909-4619-9949-f5d71dac0bcb": // Display brightness
+                case "f1fbfde2-a960-4165-9f88-50667911ce96": // Dimmed display brightness
+                    return "%";
+
+                // Sleep timeout settings
+                case "29f6c1db-86da-48c5-9fdb-f2b67b1f44da": // Sleep after (AC)
+                case "9d7815a6-7ee4-497e-8888-515a05f02364": // Sleep after (DC)
+                case "bd3b718a-0680-4d9d-8ab2-e1d2b4ac806d": // Hybrid sleep
+                case "d4e98f31-5ffe-4ce1-be31-1b38b384c009": // Hibernate after
+                    return "seconds";
+
+                // Processor power settings
+                case "bc5038f7-23e0-4960-96da-33abaf5935ec": // Maximum processor state
+                case "893dee8e-2bef-41e0-89c6-b55d0929964c": // Minimum processor state
+                    return "%";
+
+                // Battery settings
+                case "e69653ca-cf7f-4f05-aa73-cb833fa90ad4": // Critical battery level
+                case "9a66d8d7-4ff7-4ef9-b5a2-5a326ca2a469": // Low battery level
+                    return "%";
+
+                // Default to empty string for unknown units
+                default:
+                    return string.Empty;
+            }
         }
 
         /// <summary>
@@ -212,17 +264,17 @@ namespace PowerPlanTools.Utils
         public static bool UpdatePowerSetting(Guid planGuid, Guid settingGuid, Guid subGroupGuid, object acValue, object dcValue)
         {
             string query = $"SELECT * FROM Win32_PowerSettingDataIndex WHERE InstanceID = 'Microsoft:PowerSettingDataIndex\\\\{{{planGuid.ToString().ToUpper()}}}\\\\{{{subGroupGuid.ToString().ToUpper()}}}\\\\{{{settingGuid.ToString().ToUpper()}}}'";
-            
+
             using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(PowerManagementNamespace, query))
             {
                 foreach (ManagementObject settingData in searcher.Get())
                 {
                     if (acValue != null)
                         settingData["ACSettingIndex"] = acValue;
-                    
+
                     if (dcValue != null)
                         settingData["DCSettingIndex"] = dcValue;
-                    
+
                     settingData.Put();
                     return true;
                 }
@@ -253,7 +305,7 @@ namespace PowerPlanTools.Utils
         public static bool DeletePowerPlan(Guid planGuid)
         {
             string query = $"SELECT * FROM Win32_PowerPlan WHERE InstanceID = 'Microsoft:PowerPlan\\\\{{{planGuid.ToString().ToUpper()}}}'";
-            
+
             using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(PowerManagementNamespace, query))
             {
                 foreach (ManagementObject plan in searcher.Get())
@@ -278,7 +330,7 @@ namespace PowerPlanTools.Utils
 
             int startIndex = instanceId.IndexOf('{');
             int endIndex = instanceId.IndexOf('}');
-            
+
             if (startIndex >= 0 && endIndex > startIndex)
             {
                 string guidString = instanceId.Substring(startIndex, endIndex - startIndex + 1);

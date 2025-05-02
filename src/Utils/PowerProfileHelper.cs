@@ -363,6 +363,13 @@ namespace PowerPlanTools.Utils
         /// <returns>The friendly name of the setting</returns>
         private static string GetPowerSettingFriendlyName(Guid settingGuid)
         {
+            // First check if the setting is in our known settings dictionary
+            if (ArgumentCompleters.KnownPowerSettings.TryGetValue(settingGuid, out string knownName))
+            {
+                return knownName;
+            }
+
+            // If not found in dictionary, try to get it from PowrProf.dll
             uint bufferSize = 0;
             Guid emptyGuid = Guid.Empty;
             IntPtr settingGuidPtr = Marshal.AllocHGlobal(Marshal.SizeOf(settingGuid));
@@ -375,7 +382,11 @@ namespace PowerPlanTools.Utils
             {
                 if (PowerReadFriendlyName(IntPtr.Zero, ref emptyGuid, IntPtr.Zero, settingGuidPtr, buffer, ref bufferSize) == ERROR_SUCCESS)
                 {
-                    return Marshal.PtrToStringUni(buffer);
+                    string name = Marshal.PtrToStringUni(buffer);
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        return name;
+                    }
                 }
             }
             finally
@@ -425,10 +436,35 @@ namespace PowerPlanTools.Utils
         /// <returns>The units string</returns>
         private static string GetPowerSettingUnits(Guid settingGuid)
         {
-            // This is a simplified implementation
-            // In a real implementation, you would use the PowerReadSettingAttributes function
-            // or other means to get the units
-            return string.Empty;
+            // Common power setting units based on GUID
+            switch (settingGuid.ToString().ToLower())
+            {
+                // Display brightness settings
+                case "aded5e82-b909-4619-9949-f5d71dac0bcb": // Display brightness
+                case "f1fbfde2-a960-4165-9f88-50667911ce96": // Dimmed display brightness
+                    return "%";
+
+                // Sleep timeout settings
+                case "29f6c1db-86da-48c5-9fdb-f2b67b1f44da": // Sleep after (AC)
+                case "9d7815a6-7ee4-497e-8888-515a05f02364": // Sleep after (DC)
+                case "bd3b718a-0680-4d9d-8ab2-e1d2b4ac806d": // Hybrid sleep
+                case "d4e98f31-5ffe-4ce1-be31-1b38b384c009": // Hibernate after
+                    return "seconds";
+
+                // Processor power settings
+                case "bc5038f7-23e0-4960-96da-33abaf5935ec": // Maximum processor state
+                case "893dee8e-2bef-41e0-89c6-b55d0929964c": // Minimum processor state
+                    return "%";
+
+                // Battery settings
+                case "e69653ca-cf7f-4f05-aa73-cb833fa90ad4": // Critical battery level
+                case "9a66d8d7-4ff7-4ef9-b5a2-5a326ca2a469": // Low battery level
+                    return "%";
+
+                // Default to empty string for unknown units
+                default:
+                    return string.Empty;
+            }
         }
 
         /// <summary>
