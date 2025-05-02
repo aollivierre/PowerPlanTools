@@ -3,7 +3,7 @@
     RootModule = 'lib\PowerPlanTools.dll'
 
     # Version number of this module.
-    ModuleVersion = '2025.05.02.0859'
+    $12025.05.01.2330'
 
     # ID used to uniquely identify this module
     GUID = '12345678-1234-1234-1234-123456789012'
@@ -44,8 +44,7 @@
     # Assemblies that must be loaded prior to importing this module
     RequiredAssemblies = @(
         'lib\Newtonsoft.Json.dll',
-        'lib\System.Management.Automation.dll'
-    )
+        'lib\System.Management.Automation.dll')
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
     # ScriptsToProcess = @()
@@ -63,20 +62,7 @@
     FunctionsToExport = @()
 
     # Cmdlets to export from this module
-    CmdletsToExport = @(
-        'Compare-PowerPlans',
-        'Export-PowerSettings',
-        'Find-PowerSetting',
-        'Get-PowerPlan',
-        'Get-PowerPlanStatistic',
-        'Get-PowerSetting',
-        'Import-PowerSettings',
-        'New-PowerPlan',
-        'Remove-PowerPlan',
-        'Reset-PowerPlanDefaults',
-        'Set-PowerPlan',
-        'Update-PowerSetting'
-    )
+    CmdletsToExport = '*'
 
     # Variables to export from this module
     VariablesToExport = '*'
@@ -109,13 +95,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = @'
-- Added centralized logging with timestamps and counters
-- Enhanced Find-PowerSetting cmdlet with case-insensitive regex and wildcard pattern support
-- Added Import-PowerSettings cmdlet to import settings from JSON, CSV, and XML files
-- Renamed Export-PowerSetting to Export-PowerSettings for consistency (plural form)
-- Added automatic directory creation for export paths
-'@
+            ReleaseNotes = 'Initial release with native power plan and settings support'
         }
     }
 
@@ -125,6 +105,15 @@
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''
 }
+
+
+
+
+
+
+
+
+
 
 
 

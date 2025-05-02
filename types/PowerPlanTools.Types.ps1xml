@@ -2,18 +2,18 @@
 <Types>
   <!-- PowerPlan Type -->
   <Type>
-    <n>PowerPlanTools.PowerPlan</n>
+    <Name>PowerPlanTools.PowerPlan</Name>
     <Members>
       <MemberSet>
-        <n>PSStandardMembers</n>
+        <Name>PSStandardMembers</Name>
         <Members>
           <PropertySet>
-            <n>DefaultDisplayPropertySet</n>
+            <Name>DefaultDisplayPropertySet</Name>
             <ReferencedProperties>
-              <n>Name</n>
-              <n>Guid</n>
-              <n>IsActive</n>
-              <n>Description</n>
+              <Name>Name</Name>
+              <Name>Guid</Name>
+              <Name>IsActive</Name>
+              <Name>Description</Name>
             </ReferencedProperties>
           </PropertySet>
         </Members>
@@ -23,21 +23,21 @@
   
   <!-- PowerSetting Type -->
   <Type>
-    <n>PowerPlanTools.PowerSetting</n>
+    <Name>PowerPlanTools.PowerSetting</Name>
     <Members>
       <MemberSet>
-        <n>PSStandardMembers</n>
+        <Name>PSStandardMembers</Name>
         <Members>
           <PropertySet>
-            <n>DefaultDisplayPropertySet</n>
+            <Name>DefaultDisplayPropertySet</Name>
             <ReferencedProperties>
-              <n>Alias</n>
-              <n>SettingGuid</n>
-              <n>PlanName</n>
-              <n>OnBattery</n>
-              <n>PluggedIn</n>
-              <n>Units</n>
-              <n>Description</n>
+              <Name>Alias</Name>
+              <Name>SettingGuid</Name>
+              <Name>PlanName</Name>
+              <Name>OnBattery</Name>
+              <Name>PluggedIn</Name>
+              <Name>Units</Name>
+              <Name>Description</Name>
             </ReferencedProperties>
           </PropertySet>
         </Members>
@@ -47,20 +47,20 @@
   
   <!-- PowerPlanStats Type -->
   <Type>
-    <n>PowerPlanTools.PowerPlanStats</n>
+    <Name>PowerPlanTools.PowerPlanStats</Name>
     <Members>
       <MemberSet>
-        <n>PSStandardMembers</n>
+        <Name>PSStandardMembers</Name>
         <Members>
           <PropertySet>
-            <n>DefaultDisplayPropertySet</n>
+            <Name>DefaultDisplayPropertySet</Name>
             <ReferencedProperties>
-              <n>PlanName</n>
-              <n>PlanGuid</n>
-              <n>TotalDuration</n>
-              <n>PercentOfTimeActive</n>
-              <n>FirstSeen</n>
-              <n>LastSeen</n>
+              <Name>PlanName</Name>
+              <Name>PlanGuid</Name>
+              <Name>TotalDuration</Name>
+              <Name>PercentOfTimeActive</Name>
+              <Name>FirstSeen</Name>
+              <Name>LastSeen</Name>
             </ReferencedProperties>
           </PropertySet>
         </Members>

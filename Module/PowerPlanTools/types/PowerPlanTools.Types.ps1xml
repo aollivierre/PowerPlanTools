@@ -4,12 +4,6 @@
   <Type>
     <Name>PowerPlanTools.PowerPlan</Name>
     <Members>
-      <ScriptProperty>
-        <Name>IsActive</Name>
-        <GetScriptBlock>
-          $this._IsActive
-        </GetScriptBlock>
-      </ScriptProperty>
       <MemberSet>
         <Name>PSStandardMembers</Name>
         <Members>
