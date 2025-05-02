@@ -12,7 +12,6 @@ dotnet build src/PowerPlanTools.csproj -c Release
 # Copy module files to release directory
 $version = Get-Date -Format "yyyy.MM.dd.HHmm"
 $releaseDir = Join-Path $PSScriptRoot "Releases\$version"
-$moduleDir = Join-Path $PSScriptRoot "Module"
 
 Write-Host "Copying module files to release directory: $releaseDir"
 
@@ -30,30 +29,30 @@ if (-not (Test-Path $moduleReleaseDir)) {
     New-Item -Path $moduleReleaseDir -ItemType Directory -Force | Out-Null
 }
 
-# Copy module files
-Copy-Item -Path "$moduleDir\*" -Destination $moduleReleaseDir -Recurse -Force
-Copy-Item -Path "PowerPlanTools.psd1" -Destination $moduleReleaseDir -Force
-Copy-Item -Path "LICENSE" -Destination $moduleReleaseDir -Force
-Copy-Item -Path "README.md" -Destination $moduleReleaseDir -Force
-
-# Copy types directory
-Copy-Item -Path "types" -Destination $moduleReleaseDir -Recurse -Force
-
-# Create lib directory if it doesn't exist
+# Create directory structure
 $libDir = Join-Path $moduleReleaseDir "lib"
+$typesDir = Join-Path $moduleReleaseDir "types"
+
 if (-not (Test-Path $libDir)) {
     New-Item -Path $libDir -ItemType Directory -Force | Out-Null
 }
 
-# Copy DLLs to the lib directory
-if (Test-Path "$moduleDir\net472\*.dll") {
-    Copy-Item -Path "$moduleDir\net472\*.dll" -Destination $libDir -Force
-    Write-Host "Copied DLLs from net472 to lib directory"
+if (-not (Test-Path $typesDir)) {
+    New-Item -Path $typesDir -ItemType Directory -Force | Out-Null
 }
 
-# Copy all dependencies
-if (Test-Path "$moduleDir\net472\*.dll") {
-    Copy-Item -Path "$moduleDir\net472\*.dll" -Destination $libDir -Force
+# Copy module manifest and supporting files
+Copy-Item -Path "PowerPlanTools.psd1" -Destination $moduleReleaseDir -Force
+Copy-Item -Path "LICENSE" -Destination $moduleReleaseDir -Force
+Copy-Item -Path "README.md" -Destination $moduleReleaseDir -Force
+
+# Copy types files
+Copy-Item -Path "types\*.ps1xml" -Destination $typesDir -Force
+
+# Copy DLLs to the lib directory
+if (Test-Path "Module\net472\PowerPlanTools.dll") {
+    Copy-Item -Path "Module\net472\PowerPlanTools.dll" -Destination $libDir -Force
+    Write-Host "Copied PowerPlanTools.dll to lib directory"
 }
 
 # Copy NuGet dependencies

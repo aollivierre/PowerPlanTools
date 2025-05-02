@@ -1,9 +1,9 @@
 @{
     # Script module or binary module file associated with this manifest.
-    RootModule = 'PowerPlanTools.dll'
+    RootModule = 'lib\PowerPlanTools.dll'
 
     # Version number of this module.
-    $12025.05.01.2330'
+    ModuleVersion = '2025.05.02.0859'
 
     # ID used to uniquely identify this module
     GUID = '12345678-1234-1234-1234-123456789012'
@@ -43,8 +43,8 @@
 
     # Assemblies that must be loaded prior to importing this module
     RequiredAssemblies = @(
-        'Newtonsoft.Json.dll',
-        'Microsoft.Win32.TaskScheduler.dll'
+        'lib\Newtonsoft.Json.dll',
+        'lib\System.Management.Automation.dll'
     )
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
@@ -63,7 +63,20 @@
     FunctionsToExport = @()
 
     # Cmdlets to export from this module
-    CmdletsToExport = '*'
+    CmdletsToExport = @(
+        'Compare-PowerPlans',
+        'Export-PowerSettings',
+        'Find-PowerSetting',
+        'Get-PowerPlan',
+        'Get-PowerPlanStatistic',
+        'Get-PowerSetting',
+        'Import-PowerSettings',
+        'New-PowerPlan',
+        'Remove-PowerPlan',
+        'Reset-PowerPlanDefaults',
+        'Set-PowerPlan',
+        'Update-PowerSetting'
+    )
 
     # Variables to export from this module
     VariablesToExport = '*'
@@ -90,13 +103,19 @@
             LicenseUri = 'https://opensource.org/licenses/MIT'
 
             # A URL to the main website for this project.
-            ProjectUri = 'https://github.com/your-org/PowerPlanTools'
+            ProjectUri = 'https://github.com/Grace-Solutions/PowerPlanTools'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Initial release with native power plan and settings support'
+            ReleaseNotes = @'
+- Added centralized logging with timestamps and counters
+- Enhanced Find-PowerSetting cmdlet with case-insensitive regex and wildcard pattern support
+- Added Import-PowerSettings cmdlet to import settings from JSON, CSV, and XML files
+- Renamed Export-PowerSetting to Export-PowerSettings for consistency (plural form)
+- Added automatic directory creation for export paths
+'@
         }
     }
 
@@ -106,13 +125,6 @@
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
     # DefaultCommandPrefix = ''
 }
-
-
-
-
-
-
-
 
 
 

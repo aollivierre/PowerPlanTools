@@ -22,7 +22,19 @@ Write-Host "Updated $versionInfoPath"
 # Update PowerPlanTools.psd1
 $manifestPath = Join-Path $PSScriptRoot "PowerPlanTools.psd1"
 $manifestContent = Get-Content -Path $manifestPath -Raw
+
+# Update version
 $manifestContent = $manifestContent -replace '(ModuleVersion\s*=\s*[''"]).*?([''"])', "`$1$version`$2"
+
+# Ensure RootModule points to lib directory
+$manifestContent = $manifestContent -replace '(RootModule\s*=\s*[''"]).*?([''"])', "`$1lib\PowerPlanTools.dll`$2"
+
+# Ensure RequiredAssemblies point to lib directory
+$manifestContent = $manifestContent -replace '(RequiredAssemblies\s*=\s*@\()([^)]*)', "`$1`r`n        'lib\Newtonsoft.Json.dll',`r`n        'lib\System.Management.Automation.dll'"
+
+# Update ProjectUri
+$manifestContent = $manifestContent -replace '(ProjectUri\s*=\s*[''"]).*?([''"])', "`$1https://github.com/Grace-Solutions/PowerPlanTools`$2"
+
 Set-Content -Path $manifestPath -Value $manifestContent
 Write-Host "Updated $manifestPath"
 
