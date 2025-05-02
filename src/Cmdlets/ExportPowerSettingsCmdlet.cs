@@ -185,7 +185,7 @@ namespace PowerPlanTools.Cmdlets
             EnsureDirectoryExists(path);
 
             LoggingHelper.LogVerbose(this, $"Serializing {powerPlan.Settings.Count} power settings to JSON");
-            string json = JsonConvert.SerializeObject(powerPlan, Formatting.Indented);
+            string json = JsonConvert.SerializeObject(powerPlan, Newtonsoft.Json.Formatting.Indented);
 
             LoggingHelper.LogVerbose(this, $"Writing JSON data to file: {path}");
             File.WriteAllText(path, json);

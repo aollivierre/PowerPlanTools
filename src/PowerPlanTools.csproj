@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <TargetFramework>net472</TargetFramework>
     <AssemblyName>PowerPlanTools</AssemblyName>
     <RootNamespace>PowerPlanTools</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -20,5 +20,13 @@
     <PackageReference Include="Microsoft.Win32.TaskScheduler" Version="2.2.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Management.Automation" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 </Project>
