@@ -237,11 +237,11 @@ namespace PowerPlanTools.Utils
                 foreach (Guid settingGuid in settingGuids)
                 {
                     PowerSetting setting = GetPowerSettingInfo(planGuid, subGroupGuid, settingGuid);
-                    
+
                     // Skip hidden settings if not requested
                     if (setting.IsHidden && !includeHidden)
                         continue;
-                    
+
                     settings.Add(setting);
                 }
             }
@@ -296,7 +296,7 @@ namespace PowerPlanTools.Utils
 
             IntPtr schemeGuidPtr = Marshal.AllocHGlobal(Marshal.SizeOf(planGuid));
             IntPtr subGroupGuidPtr = Marshal.AllocHGlobal(Marshal.SizeOf(subGroupGuid));
-            
+
             Marshal.StructureToPtr(planGuid, schemeGuidPtr, false);
             Marshal.StructureToPtr(subGroupGuid, subGroupGuidPtr, false);
 
@@ -329,11 +329,11 @@ namespace PowerPlanTools.Utils
         {
             string name = GetPowerSettingFriendlyName(settingGuid);
             string description = GetPowerSettingDescription(settingGuid);
-            
+
             uint acType = 0;
             uint acValue = 0;
             uint acBufferSize = 4;
-            
+
             uint dcType = 0;
             uint dcValue = 0;
             uint dcBufferSize = 4;
@@ -492,6 +492,38 @@ namespace PowerPlanTools.Utils
             }
 
             return Guid.Empty;
+        }
+
+        /// <summary>
+        /// Gets a power setting value
+        /// </summary>
+        /// <param name="planGuid">The GUID of the power plan</param>
+        /// <param name="subGroupGuid">The GUID of the subgroup</param>
+        /// <param name="settingGuid">The GUID of the setting</param>
+        /// <param name="getAcValue">True to get AC value, false to get DC value</param>
+        /// <returns>The setting value, or null if not found</returns>
+        public static uint? GetPowerSettingValue(Guid planGuid, Guid subGroupGuid, Guid settingGuid, bool getAcValue = true)
+        {
+            uint type = 0;
+            uint value = 0;
+            uint bufferSize = 4;
+
+            uint result;
+            if (getAcValue)
+            {
+                result = PowerReadACValue(IntPtr.Zero, ref planGuid, ref subGroupGuid, ref settingGuid, ref type, ref value, ref bufferSize);
+            }
+            else
+            {
+                result = PowerReadDCValue(IntPtr.Zero, ref planGuid, ref subGroupGuid, ref settingGuid, ref type, ref value, ref bufferSize);
+            }
+
+            if (result == ERROR_SUCCESS)
+            {
+                return value;
+            }
+
+            return null;
         }
 
         /// <summary>
