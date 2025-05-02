@@ -42,7 +42,7 @@ namespace PowerPlanTools.Utils
                         $"\"{p.Name}\"",
                         p.Name,
                         CompletionResultType.ParameterValue,
-                        $"{p.Name} ({(p._IsActive ? "Active" : "Inactive")})"
+                        $"{p.Name} ({(p.IsActive ? "Active" : "Inactive")})"
                     ));
             }
         }

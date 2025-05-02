@@ -22,7 +22,7 @@ namespace PowerPlanTools.Models
         /// <summary>
         /// Gets or sets a value indicating whether this power plan is active
         /// </summary>
-        public bool _IsActive { get; set; }
+        public bool IsActive { get; set; }
 
         /// <summary>
         /// Gets or sets the description of the power plan
@@ -53,7 +53,7 @@ namespace PowerPlanTools.Models
         {
             Name = name;
             Guid = guid;
-            _IsActive = isActive;
+            IsActive = isActive;
             Description = description;
             Settings = new List<PowerSetting>();
         }

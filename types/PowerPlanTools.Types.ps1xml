@@ -2,24 +2,18 @@
 <Types>
   <!-- PowerPlan Type -->
   <Type>
-    <Name>PowerPlanTools.PowerPlan</Name>
+    <n>PowerPlanTools.PowerPlan</n>
     <Members>
-      <ScriptProperty>
-        <Name>IsActive</Name>
-        <GetScriptBlock>
-          $this._IsActive
-        </GetScriptBlock>
-      </ScriptProperty>
       <MemberSet>
-        <Name>PSStandardMembers</Name>
+        <n>PSStandardMembers</n>
         <Members>
           <PropertySet>
-            <Name>DefaultDisplayPropertySet</Name>
+            <n>DefaultDisplayPropertySet</n>
             <ReferencedProperties>
-              <Name>Name</Name>
-              <Name>Guid</Name>
-              <Name>IsActive</Name>
-              <Name>Description</Name>
+              <n>Name</n>
+              <n>Guid</n>
+              <n>IsActive</n>
+              <n>Description</n>
             </ReferencedProperties>
           </PropertySet>
         </Members>
@@ -29,21 +23,21 @@
   
   <!-- PowerSetting Type -->
   <Type>
-    <Name>PowerPlanTools.PowerSetting</Name>
+    <n>PowerPlanTools.PowerSetting</n>
     <Members>
       <MemberSet>
-        <Name>PSStandardMembers</Name>
+        <n>PSStandardMembers</n>
         <Members>
           <PropertySet>
-            <Name>DefaultDisplayPropertySet</Name>
+            <n>DefaultDisplayPropertySet</n>
             <ReferencedProperties>
-              <Name>Alias</Name>
-              <Name>SettingGuid</Name>
-              <Name>PlanName</Name>
-              <Name>OnBattery</Name>
-              <Name>PluggedIn</Name>
-              <Name>Units</Name>
-              <Name>Description</Name>
+              <n>Alias</n>
+              <n>SettingGuid</n>
+              <n>PlanName</n>
+              <n>OnBattery</n>
+              <n>PluggedIn</n>
+              <n>Units</n>
+              <n>Description</n>
             </ReferencedProperties>
           </PropertySet>
         </Members>
@@ -53,20 +47,20 @@
   
   <!-- PowerPlanStats Type -->
   <Type>
-    <Name>PowerPlanTools.PowerPlanStats</Name>
+    <n>PowerPlanTools.PowerPlanStats</n>
     <Members>
       <MemberSet>
-        <Name>PSStandardMembers</Name>
+        <n>PSStandardMembers</n>
         <Members>
           <PropertySet>
-            <Name>DefaultDisplayPropertySet</Name>
+            <n>DefaultDisplayPropertySet</n>
             <ReferencedProperties>
-              <Name>PlanName</Name>
-              <Name>PlanGuid</Name>
-              <Name>TotalDuration</Name>
-              <Name>PercentOfTimeActive</Name>
-              <Name>FirstSeen</Name>
-              <Name>LastSeen</Name>
+              <n>PlanName</n>
+              <n>PlanGuid</n>
+              <n>TotalDuration</n>
+              <n>PercentOfTimeActive</n>
+              <n>FirstSeen</n>
+              <n>LastSeen</n>
             </ReferencedProperties>
           </PropertySet>
         </Members>

@@ -96,7 +96,7 @@ namespace PowerPlanTools.Cmdlets
                 {
                     bool nameMatch = string.IsNullOrEmpty(Name) || plan.Name.Equals(Name, StringComparison.OrdinalIgnoreCase);
                     bool guidMatch = !Guid.HasValue || plan.Guid == Guid.Value;
-                    bool activeMatch = !Active.IsPresent || plan._IsActive;
+                    bool activeMatch = !Active.IsPresent || plan.IsActive;
 
                     if (nameMatch && guidMatch && activeMatch)
                     {
