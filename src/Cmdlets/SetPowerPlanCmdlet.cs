@@ -48,10 +48,10 @@ namespace PowerPlanTools.Cmdlets
         public SwitchParameter PassThru { get; set; }
 
         /// <summary>
-        /// <para type="description">Gets or sets whether to use PowrProf.dll instead of WMI.</para>
+        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
         /// </summary>
         [Parameter]
-        public SwitchParameter UsePowrProf { get; set; }
+        public SwitchParameter UseWmi { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.
@@ -67,7 +67,7 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName == "ByName")
                 {
                     // Find the plan by name
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
 
                     if (plan == null)
@@ -89,7 +89,7 @@ namespace PowerPlanTools.Cmdlets
                     planGuid = Guid;
 
                     // Get the plan name for display
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Guid == planGuid);
                     planName = plan?.Name ?? planGuid.ToString();
                 }
@@ -102,13 +102,13 @@ namespace PowerPlanTools.Cmdlets
 
                 // Set the active power plan
                 bool success;
-                if (UsePowrProf)
+                if (UseWmi)
                 {
-                    success = PowerProfileHelper.SetActivePowerPlan(planGuid);
+                    success = WmiHelper.SetActivePowerPlan(planGuid);
                 }
                 else
                 {
-                    success = WmiHelper.SetActivePowerPlan(planGuid);
+                    success = PowerProfileHelper.SetActivePowerPlan(planGuid);
                 }
 
                 if (!success)
@@ -124,7 +124,7 @@ namespace PowerPlanTools.Cmdlets
                 // Return the power plan if requested
                 if (PassThru)
                 {
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var activePlan = powerPlans.Find(p => p.Guid == planGuid);
                     if (activePlan != null)
                     {

@@ -87,10 +87,10 @@ namespace PowerPlanTools.Cmdlets
         public SwitchParameter PassThru { get; set; }
 
         /// <summary>
-        /// <para type="description">Gets or sets whether to use PowrProf.dll instead of WMI.</para>
+        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
         /// </summary>
         [Parameter]
-        public SwitchParameter UsePowrProf { get; set; }
+        public SwitchParameter UseWmi { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.
@@ -117,7 +117,7 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName.StartsWith("ByPlanName"))
                 {
                     // Find the plan by name
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(PlanName, StringComparison.OrdinalIgnoreCase));
 
                     if (plan == null)
@@ -139,7 +139,7 @@ namespace PowerPlanTools.Cmdlets
                     planGuid = PlanGuid;
 
                     // Get the plan name for display
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Guid == planGuid);
                     planName = plan?.Name ?? planGuid.ToString();
                 }
@@ -152,9 +152,9 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName.EndsWith("SettingAlias"))
                 {
                     // Find the setting by alias
-                    var settings = UsePowrProf ?
-                        PowerProfileHelper.GetPowerSettings(planGuid, true) :
-                        WmiHelper.GetPowerSettings(planGuid, true);
+                    var settings = UseWmi ?
+                        WmiHelper.GetPowerSettings(planGuid, true) :
+                        PowerProfileHelper.GetPowerSettings(planGuid, true);
 
                     var setting = settings.Find(s => s.Alias.Equals(SettingAlias, StringComparison.OrdinalIgnoreCase));
 
@@ -180,9 +180,9 @@ namespace PowerPlanTools.Cmdlets
                     // If subgroup GUID is not provided, try to find it
                     if (!SubGroupGuid.HasValue)
                     {
-                        var settings = UsePowrProf ?
-                            PowerProfileHelper.GetPowerSettings(planGuid, true) :
-                            WmiHelper.GetPowerSettings(planGuid, true);
+                        var settings = UseWmi ?
+                            WmiHelper.GetPowerSettings(planGuid, true) :
+                            PowerProfileHelper.GetPowerSettings(planGuid, true);
 
                         var setting = settings.Find(s => s.SettingGuid == settingGuid);
 
@@ -218,13 +218,13 @@ namespace PowerPlanTools.Cmdlets
 
                 // Update the setting
                 bool success;
-                if (UsePowrProf)
+                if (UseWmi)
                 {
-                    success = PowerProfileHelper.UpdatePowerSetting(planGuid, settingGuid, subGroupGuid, acValue, dcValue);
+                    success = WmiHelper.UpdatePowerSetting(planGuid, settingGuid, subGroupGuid, acValue, dcValue);
                 }
                 else
                 {
-                    success = WmiHelper.UpdatePowerSetting(planGuid, settingGuid, subGroupGuid, acValue, dcValue);
+                    success = PowerProfileHelper.UpdatePowerSetting(planGuid, settingGuid, subGroupGuid, acValue, dcValue);
                 }
 
                 if (!success)
@@ -242,9 +242,9 @@ namespace PowerPlanTools.Cmdlets
                 // Return the updated setting if requested
                 if (PassThru)
                 {
-                    var settings = UsePowrProf ?
-                        PowerProfileHelper.GetPowerSettings(planGuid, true) :
-                        WmiHelper.GetPowerSettings(planGuid, true);
+                    var settings = UseWmi ?
+                        WmiHelper.GetPowerSettings(planGuid, true) :
+                        PowerProfileHelper.GetPowerSettings(planGuid, true);
 
                     var updatedSetting = settings.Find(s => s.SettingGuid == settingGuid);
 
