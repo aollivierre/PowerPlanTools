@@ -36,7 +36,19 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
    - `$env:USERPROFILE\Documents\WindowsPowerShell\Modules\` (for current user)
    - `$env:ProgramFiles\WindowsPowerShell\Modules\` (for all users, requires admin)
 
-### Option 3: Install from Source
+### Option 3: Install from Module Folder
+
+```powershell
+# Clone the repository
+git clone https://github.com/Grace-Solutions/PowerPlanTools.git
+cd PowerPlanTools
+
+# Copy the module to your PowerShell modules directory
+$modulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules"
+Copy-Item -Path ".\Module\PowerPlanTools" -Destination $modulePath -Recurse -Force
+```
+
+### Option 4: Build from Source
 
 ```powershell
 # Clone the repository
