@@ -3,7 +3,7 @@
     RootModule = 'lib\PowerPlanTools.dll'
 
     # Version number of this module.
-    ModuleVersion = '2025.05.02.1230'
+    ModuleVersion = '2025.05.02.1542'
 
     # Supported PSEditions
     CompatiblePSEditions = @('Desktop', 'Core')
@@ -45,7 +45,7 @@
     # RequiredModules = @()
 
     # Assemblies that must be loaded prior to importing this module
-    RequiredAssemblies = @('lib\PowerPlanTools.dll')
+    RequiredAssemblies = @('lib\PowerPlanTools.dll', 'lib\Newtonsoft.Json.dll')
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
     # ScriptsToProcess = @()
