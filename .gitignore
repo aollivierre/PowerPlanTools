@@ -6,14 +6,22 @@
 *.nupkg
 *.log
 
+# Exception for Module folder binaries
+!/Module/**/*.dll
+!/Module/**/*.pdb
+!/Module/**/*.ps1xml
+
 # Generated directories
 /Releases/
 /Artifacts/
-/Module/PowerPlanTools/lib/*.dll
-/Module/PowerPlanTools/types/*.ps1xml
 bin/
 obj/
 .vs/
 
+# Exception for Module folder - include everything
+!/Module/
+!/Module/**/*
+
 # Generated files
 PowerPlanTools.psd1
+!/Module/**/*.psd1
