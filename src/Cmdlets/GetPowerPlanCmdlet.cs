@@ -65,10 +65,10 @@ namespace PowerPlanTools.Cmdlets
         public SwitchParameter IncludeHidden { get; set; }
 
         /// <summary>
-        /// <para type="description">Gets or sets whether to use PowrProf.dll instead of WMI.</para>
+        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
         /// </summary>
         [Parameter]
-        public SwitchParameter UsePowrProf { get; set; }
+        public SwitchParameter UseWmi { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.
@@ -79,14 +79,14 @@ namespace PowerPlanTools.Cmdlets
             {
                 List<PowerPlan> powerPlans;
 
-                // Get power plans using either WMI or PowrProf.dll
-                if (UsePowrProf)
+                // Get power plans using either PowrProf.dll (default) or WMI
+                if (UseWmi)
                 {
-                    powerPlans = PowerProfileHelper.GetPowerPlans();
+                    powerPlans = WmiHelper.GetPowerPlans();
                 }
                 else
                 {
-                    powerPlans = WmiHelper.GetPowerPlans();
+                    powerPlans = PowerProfileHelper.GetPowerPlans();
                 }
 
                 // Filter by name, GUID, or active status
@@ -103,13 +103,13 @@ namespace PowerPlanTools.Cmdlets
                         // Include settings if requested
                         if (IncludeSettings)
                         {
-                            if (UsePowrProf)
+                            if (UseWmi)
                             {
-                                plan.Settings = PowerProfileHelper.GetPowerSettings(plan.Guid, IncludeHidden);
+                                plan.Settings = WmiHelper.GetPowerSettings(plan.Guid, IncludeHidden);
                             }
                             else
                             {
-                                plan.Settings = WmiHelper.GetPowerSettings(plan.Guid, IncludeHidden);
+                                plan.Settings = PowerProfileHelper.GetPowerSettings(plan.Guid, IncludeHidden);
                             }
                         }
 

@@ -61,10 +61,10 @@ namespace PowerPlanTools.Cmdlets
         public SwitchParameter IncludeHidden { get; set; }
 
         /// <summary>
-        /// <para type="description">Gets or sets whether to use PowrProf.dll instead of WMI.</para>
+        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
         /// </summary>
         [Parameter]
-        public SwitchParameter UsePowrProf { get; set; }
+        public SwitchParameter UseWmi { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.
@@ -80,7 +80,7 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName == "ByPlanName")
                 {
                     // Find the plan by name
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(ReferencePlanName, StringComparison.OrdinalIgnoreCase));
 
                     if (plan == null)
@@ -102,7 +102,7 @@ namespace PowerPlanTools.Cmdlets
                     referencePlanGuid = ReferencePlanGuid;
 
                     // Get the plan name for display
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Guid == referencePlanGuid);
                     referencePlanName = plan?.Name ?? referencePlanGuid.ToString();
                 }
@@ -114,7 +114,7 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName == "ByPlanName")
                 {
                     // Find the plan by name
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(DifferencePlanName, StringComparison.OrdinalIgnoreCase));
 
                     if (plan == null)
@@ -136,19 +136,19 @@ namespace PowerPlanTools.Cmdlets
                     differencePlanGuid = DifferencePlanGuid;
 
                     // Get the plan name for display
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Guid == differencePlanGuid);
                     differencePlanName = plan?.Name ?? differencePlanGuid.ToString();
                 }
 
                 // Get power settings for both plans
-                var referenceSettings = UsePowrProf ?
-                    PowerProfileHelper.GetPowerSettings(referencePlanGuid, IncludeHidden) :
-                    WmiHelper.GetPowerSettings(referencePlanGuid, IncludeHidden);
+                var referenceSettings = UseWmi ?
+                    WmiHelper.GetPowerSettings(referencePlanGuid, IncludeHidden) :
+                    PowerProfileHelper.GetPowerSettings(referencePlanGuid, IncludeHidden);
 
-                var differenceSettings = UsePowrProf ?
-                    PowerProfileHelper.GetPowerSettings(differencePlanGuid, IncludeHidden) :
-                    WmiHelper.GetPowerSettings(differencePlanGuid, IncludeHidden);
+                var differenceSettings = UseWmi ?
+                    WmiHelper.GetPowerSettings(differencePlanGuid, IncludeHidden) :
+                    PowerProfileHelper.GetPowerSettings(differencePlanGuid, IncludeHidden);
 
                 // Compare settings
                 var differences = ComparePowerSettings(referenceSettings, differenceSettings, referencePlanName, differencePlanName);

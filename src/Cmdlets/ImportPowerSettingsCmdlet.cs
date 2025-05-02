@@ -66,10 +66,10 @@ namespace PowerPlanTools.Cmdlets
         public SwitchParameter CreateIfNotExists { get; set; }
 
         /// <summary>
-        /// <para type="description">Gets or sets whether to use PowrProf.dll instead of WMI.</para>
+        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
         /// </summary>
         [Parameter]
-        public SwitchParameter UsePowrProf { get; set; }
+        public SwitchParameter UseWmi { get; set; }
 
         /// <summary>
         /// <para type="description">Gets or sets whether to return the updated power plan.</para>
@@ -151,7 +151,7 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName == "ByPlanName")
                 {
                     // Find the plan by name
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(PlanName, StringComparison.OrdinalIgnoreCase));
 
                     if (plan == null)
@@ -186,15 +186,15 @@ namespace PowerPlanTools.Cmdlets
                         }
 
                         LoggingHelper.LogVerbose(this, $"Creating new power plan: {PlanName}");
-                        if (UsePowrProf)
-                        {
-                            LoggingHelper.LogVerbose(this, $"Using PowerProfileHelper to create plan");
-                            targetPlanGuid = PowerProfileHelper.CreatePowerPlan(balancedPlan.Guid, PlanName);
-                        }
-                        else
+                        if (UseWmi)
                         {
                             LoggingHelper.LogVerbose(this, $"Using WmiHelper to create plan");
                             targetPlanGuid = WmiHelper.CreatePowerPlan(balancedPlan.Guid, PlanName);
+                        }
+                        else
+                        {
+                            LoggingHelper.LogVerbose(this, $"Using PowerProfileHelper to create plan");
+                            targetPlanGuid = PowerProfileHelper.CreatePowerPlan(balancedPlan.Guid, PlanName);
                         }
 
                         if (targetPlanGuid == Guid.Empty)
@@ -223,7 +223,7 @@ namespace PowerPlanTools.Cmdlets
                     targetPlanGuid = PlanGuid;
 
                     // Get the plan name for display
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Guid == targetPlanGuid);
 
                     if (plan == null)
@@ -257,13 +257,13 @@ namespace PowerPlanTools.Cmdlets
                             return;
                         }
 
-                        if (UsePowrProf)
+                        if (UseWmi)
                         {
-                            targetPlanGuid = PowerProfileHelper.CreatePowerPlan(balancedPlan.Guid, newPlanName);
+                            targetPlanGuid = WmiHelper.CreatePowerPlan(balancedPlan.Guid, newPlanName);
                         }
                         else
                         {
-                            targetPlanGuid = WmiHelper.CreatePowerPlan(balancedPlan.Guid, newPlanName);
+                            targetPlanGuid = PowerProfileHelper.CreatePowerPlan(balancedPlan.Guid, newPlanName);
                         }
 
                         if (targetPlanGuid == Guid.Empty)
@@ -307,16 +307,7 @@ namespace PowerPlanTools.Cmdlets
                         LoggingHelper.LogVerbose(this, $"  Values - OnBattery: {setting.OnBattery}, PluggedIn: {setting.PluggedIn}");
 
                         bool success;
-                        if (UsePowrProf)
-                        {
-                            success = PowerProfileHelper.UpdatePowerSetting(
-                                targetPlanGuid,
-                                setting.SettingGuid,
-                                setting.SubGroupGuid,
-                                setting.PluggedIn != null ? Convert.ToUInt32(setting.PluggedIn) : (uint?)null,
-                                setting.OnBattery != null ? Convert.ToUInt32(setting.OnBattery) : (uint?)null);
-                        }
-                        else
+                        if (UseWmi)
                         {
                             success = WmiHelper.UpdatePowerSetting(
                                 targetPlanGuid,
@@ -324,6 +315,15 @@ namespace PowerPlanTools.Cmdlets
                                 setting.SubGroupGuid,
                                 setting.PluggedIn,
                                 setting.OnBattery);
+                        }
+                        else
+                        {
+                            success = PowerProfileHelper.UpdatePowerSetting(
+                                targetPlanGuid,
+                                setting.SettingGuid,
+                                setting.SubGroupGuid,
+                                setting.PluggedIn != null ? Convert.ToUInt32(setting.PluggedIn) : (uint?)null,
+                                setting.OnBattery != null ? Convert.ToUInt32(setting.OnBattery) : (uint?)null);
                         }
 
                         if (success)
@@ -358,17 +358,17 @@ namespace PowerPlanTools.Cmdlets
                 // Return the updated power plan if requested
                 if (PassThru)
                 {
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var updatedPlan = powerPlans.Find(p => p.Guid == targetPlanGuid);
                     if (updatedPlan != null)
                     {
-                        if (UsePowrProf)
+                        if (UseWmi)
                         {
-                            updatedPlan.Settings = PowerProfileHelper.GetPowerSettings(targetPlanGuid, true);
+                            updatedPlan.Settings = WmiHelper.GetPowerSettings(targetPlanGuid, true);
                         }
                         else
                         {
-                            updatedPlan.Settings = WmiHelper.GetPowerSettings(targetPlanGuid, true);
+                            updatedPlan.Settings = PowerProfileHelper.GetPowerSettings(targetPlanGuid, true);
                         }
                         WriteObject(updatedPlan);
                     }

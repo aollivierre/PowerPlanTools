@@ -76,10 +76,10 @@ namespace PowerPlanTools.Cmdlets
         public SwitchParameter IncludeHidden { get; set; }
 
         /// <summary>
-        /// <para type="description">Gets or sets whether to use PowrProf.dll instead of WMI.</para>
+        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
         /// </summary>
         [Parameter]
-        public SwitchParameter UsePowrProf { get; set; }
+        public SwitchParameter UseWmi { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.
@@ -94,7 +94,7 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName == "ByPlanName")
                 {
                     // Find the plan by name
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(PlanName, StringComparison.OrdinalIgnoreCase));
 
                     if (plan == null)
@@ -117,13 +117,13 @@ namespace PowerPlanTools.Cmdlets
 
                 // Get power settings
                 List<PowerSetting> settings;
-                if (UsePowrProf)
+                if (UseWmi)
                 {
-                    settings = PowerProfileHelper.GetPowerSettings(planGuid, IncludeHidden);
+                    settings = WmiHelper.GetPowerSettings(planGuid, IncludeHidden);
                 }
                 else
                 {
-                    settings = WmiHelper.GetPowerSettings(planGuid, IncludeHidden);
+                    settings = PowerProfileHelper.GetPowerSettings(planGuid, IncludeHidden);
                 }
 
                 // Filter settings

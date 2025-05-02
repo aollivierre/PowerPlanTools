@@ -53,10 +53,10 @@ namespace PowerPlanTools.Cmdlets
         public SwitchParameter PassThru { get; set; }
 
         /// <summary>
-        /// <para type="description">Gets or sets whether to use PowrProf.dll instead of WMI.</para>
+        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
         /// </summary>
         [Parameter]
-        public SwitchParameter UsePowrProf { get; set; }
+        public SwitchParameter UseWmi { get; set; }
 
         /// <summary>
         /// Processes the cmdlet.
@@ -72,9 +72,9 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName == "ByName")
                 {
                     // Find the plan by name
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(SourcePlanName, StringComparison.OrdinalIgnoreCase));
-                    
+
                     if (plan == null)
                     {
                         WriteError(new ErrorRecord(
@@ -92,9 +92,9 @@ namespace PowerPlanTools.Cmdlets
                 {
                     // Use the provided GUID
                     sourcePlanGuid = SourcePlanGuid;
-                    
+
                     // Get the plan name for display
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Guid == sourcePlanGuid);
                     sourcePlanName = plan?.Name ?? sourcePlanGuid.ToString();
                 }
@@ -107,13 +107,13 @@ namespace PowerPlanTools.Cmdlets
 
                 // Create the new power plan
                 Guid newPlanGuid;
-                if (UsePowrProf)
+                if (UseWmi)
                 {
-                    newPlanGuid = PowerProfileHelper.CreatePowerPlan(sourcePlanGuid, NewPlanName);
+                    newPlanGuid = WmiHelper.CreatePowerPlan(sourcePlanGuid, NewPlanName);
                 }
                 else
                 {
-                    newPlanGuid = WmiHelper.CreatePowerPlan(sourcePlanGuid, NewPlanName);
+                    newPlanGuid = PowerProfileHelper.CreatePowerPlan(sourcePlanGuid, NewPlanName);
                 }
 
                 if (newPlanGuid == Guid.Empty)
@@ -129,7 +129,7 @@ namespace PowerPlanTools.Cmdlets
                 // Return the new power plan if requested
                 if (PassThru)
                 {
-                    var powerPlans = UsePowrProf ? PowerProfileHelper.GetPowerPlans() : WmiHelper.GetPowerPlans();
+                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
                     var newPlan = powerPlans.Find(p => p.Guid == newPlanGuid);
                     if (newPlan != null)
                     {
