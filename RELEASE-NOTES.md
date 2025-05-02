@@ -1,4 +1,4 @@
-# PowerPlanTools v2025.05.02.0851 Release Notes
+# PowerPlanTools v2025.05.02.0859 Release Notes
 
 ## New Features
 
