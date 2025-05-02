@@ -9,7 +9,11 @@
 # Generated directories
 /Releases/
 /Artifacts/
-/Module/
+/Module/PowerPlanTools/lib/
+/Module/PowerPlanTools/types/
+/Module/PowerPlanTools/*.psd1
+/Module/PowerPlanTools/LICENSE
+/Module/PowerPlanTools/README.md
 bin/
 obj/
 .vs/

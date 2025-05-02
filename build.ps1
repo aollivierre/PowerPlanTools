@@ -116,4 +116,16 @@ Write-Host "To use the module, open a new PowerShell window and run: Import-Modu
 
 Set-Content -Path (Join-Path $releaseDir "Install-PowerPlanTools.ps1") -Value $installScript
 
+# Copy the module files to the Module folder
+$moduleFolder = Join-Path $PSScriptRoot "Module\PowerPlanTools"
+if (Test-Path $moduleFolder) {
+    # Clear the Module folder
+    Remove-Item -Path "$moduleFolder\*" -Recurse -Force
+
+    # Copy the module files
+    Copy-Item -Path "$moduleReleaseDir\*" -Destination $moduleFolder -Recurse -Force
+    Write-Host "Copied module files to Module folder"
+}
+
 Write-Host "Build completed successfully. Module files are in: $releaseDir"
+Write-Host "Latest module version is also available in: $moduleFolder"
