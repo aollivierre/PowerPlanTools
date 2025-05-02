@@ -1,0 +1,18 @@
+# Binaries and build artifacts
+*.dll
+*.exe
+*.pdb
+*.zip
+*.nupkg
+*.log
+
+# Generated directories
+/Releases/
+/Artifacts/
+/Module/
+bin/
+obj/
+.vs/
+
+# Generated files
+PowerPlanTools.psd1

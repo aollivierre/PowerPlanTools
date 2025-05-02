@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Types>
+  <!-- PowerPlan Type -->
+  <Type>
+    <Name>PowerPlanTools.PowerPlan</Name>
+    <Members>
+      <ScriptProperty>
+        <Name>IsActive</Name>
+        <GetScriptBlock>
+          $this._IsActive
+        </GetScriptBlock>
+      </ScriptProperty>
+      <MemberSet>
+        <Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet>
+            <Name>DefaultDisplayPropertySet</Name>
+            <ReferencedProperties>
+              <Name>Name</Name>
+              <Name>Guid</Name>
+              <Name>IsActive</Name>
+              <Name>Description</Name>
+            </ReferencedProperties>
+          </PropertySet>
+        </Members>
+      </MemberSet>
+    </Members>
+  </Type>
+  
+  <!-- PowerSetting Type -->
+  <Type>
+    <Name>PowerPlanTools.PowerSetting</Name>
+    <Members>
+      <MemberSet>
+        <Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet>
+            <Name>DefaultDisplayPropertySet</Name>
+            <ReferencedProperties>
+              <Name>Alias</Name>
+              <Name>SettingGuid</Name>
+              <Name>PlanName</Name>
+              <Name>OnBattery</Name>
+              <Name>PluggedIn</Name>
+              <Name>Units</Name>
+              <Name>Description</Name>
+            </ReferencedProperties>
+          </PropertySet>
+        </Members>
+      </MemberSet>
+    </Members>
+  </Type>
+  
+  <!-- PowerPlanStats Type -->
+  <Type>
+    <Name>PowerPlanTools.PowerPlanStats</Name>
+    <Members>
+      <MemberSet>
+        <Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet>
+            <Name>DefaultDisplayPropertySet</Name>
+            <ReferencedProperties>
+              <Name>PlanName</Name>
+              <Name>PlanGuid</Name>
+              <Name>TotalDuration</Name>
+              <Name>PercentOfTimeActive</Name>
+              <Name>FirstSeen</Name>
+              <Name>LastSeen</Name>
+            </ReferencedProperties>
+          </PropertySet>
+        </Members>
+      </MemberSet>
+    </Members>
+  </Type>
+</Types>
