@@ -33,10 +33,10 @@
     # PowerShellHostVersion = ''
 
     # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-    DotNetFrameworkVersion = '4.7.2'
+    # DotNetFrameworkVersion = '4.7.2'
 
     # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-    CLRVersion = '4.0'
+    # CLRVersion = '4.0'
 
     # Processor architecture (None, X86, Amd64) required by this module
     # ProcessorArchitecture = ''
@@ -45,7 +45,7 @@
     # RequiredModules = @()
 
     # Assemblies that must be loaded prior to importing this module
-    RequiredAssemblies = @('lib\PowerPlanTools.dll', 'lib\Newtonsoft.Json.dll')
+    # RequiredAssemblies = @('lib\PowerPlanTools.dll', 'lib\Newtonsoft.Json.dll')
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
     # ScriptsToProcess = @()
