@@ -21,7 +21,7 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
 
 ### Option 1: Install from GitHub Release
 
-1. Download the latest release ZIP file from the [Releases page](https://github.com/GraceSolutions/PowerPlanTools/releases)
+1. Download the latest release ZIP file from the [Releases page](https://github.com/Grace-Solutions/PowerPlanTools/releases)
 2. Extract the ZIP file to a temporary location
 3. Run the included `Install-PowerPlanTools.ps1` script, which will:
    - Find the appropriate PowerShell modules directory
@@ -30,7 +30,7 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
 
 ### Option 2: Manual Installation
 
-1. Download the latest release ZIP file from the [Releases page](https://github.com/GraceSolutions/PowerPlanTools/releases)
+1. Download the latest release ZIP file from the [Releases page](https://github.com/Grace-Solutions/PowerPlanTools/releases)
 2. Extract the ZIP file to a temporary location
 3. Copy the `PowerPlanTools` folder to one of these locations:
    - `$env:USERPROFILE\Documents\WindowsPowerShell\Modules\` (for current user)
@@ -40,7 +40,7 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
 
 ```powershell
 # Clone the repository
-git clone https://github.com/GraceSolutions/PowerPlanTools.git
+git clone https://github.com/Grace-Solutions/PowerPlanTools.git
 cd PowerPlanTools
 
 # Build the module
