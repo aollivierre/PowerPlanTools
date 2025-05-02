@@ -67,4 +67,26 @@
       </MemberSet>
     </Members>
   </Type>
+  
+  <!-- PowerStateInfo Type -->
+  <Type>
+    <Name>PowerPlanTools.PowerStateInfo</Name>
+    <Members>
+      <MemberSet>
+        <Name>PSStandardMembers</Name>
+        <Members>
+          <PropertySet>
+            <Name>DefaultDisplayPropertySet</Name>
+            <ReferencedProperties>
+              <Name>ConnectedStandby</Name>
+              <Name>FastStartup</Name>
+              <Name>S0LowPowerIdle</Name>
+              <Name>Hibernate</Name>
+              <Name>HybridSleep</Name>
+            </ReferencedProperties>
+          </PropertySet>
+        </Members>
+      </MemberSet>
+    </Members>
+  </Type>
 </Types>

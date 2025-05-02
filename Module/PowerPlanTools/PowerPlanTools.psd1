@@ -3,7 +3,7 @@
     RootModule = 'lib\PowerPlanTools.dll'
 
     # Version number of this module.
-    ModuleVersion = '2025.05.02.1202'
+    ModuleVersion = '2025.05.02.1230'
 
     # Supported PSEditions
     CompatiblePSEditions = @('Desktop', 'Core')
