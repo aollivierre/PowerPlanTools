@@ -143,7 +143,8 @@ namespace PowerPlanTools.Utils
             string alias = "Unknown Setting";
             string description = string.Empty;
 
-            if (ArgumentCompleters.KnownPowerSettings.TryGetValue(settingGuid, out string knownName))
+            string knownName = PowerSettingAliases.GetPowerSettingAlias(settingGuid);
+            if (knownName != settingGuid.ToString())
             {
                 alias = knownName;
             }
@@ -156,7 +157,7 @@ namespace PowerPlanTools.Utils
                 foreach (ManagementObject settingObj in searcher.Get())
                 {
                     // Only use WMI name if we don't have a known name
-                    if (!ArgumentCompleters.KnownPowerSettings.ContainsKey(settingGuid))
+                    if (PowerSettingAliases.GetPowerSettingAlias(settingGuid) == settingGuid.ToString())
                     {
                         string elementName = settingObj["ElementName"] as string;
                         if (!string.IsNullOrEmpty(elementName))

@@ -364,7 +364,8 @@ namespace PowerPlanTools.Utils
         private static string GetPowerSettingFriendlyName(Guid settingGuid)
         {
             // First check if the setting is in our known settings dictionary
-            if (ArgumentCompleters.KnownPowerSettings.TryGetValue(settingGuid, out string knownName))
+            string knownName = PowerSettingAliases.GetPowerSettingAlias(settingGuid);
+            if (knownName != settingGuid.ToString())
             {
                 return knownName;
             }
