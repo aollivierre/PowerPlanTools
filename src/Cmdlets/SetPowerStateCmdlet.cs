@@ -71,9 +71,12 @@ namespace PowerPlanTools.Cmdlets
                 if (ConnectedStandby.HasValue)
                 {
                     string action = ConnectedStandby.Value ? "Enable" : "Disable";
-                    if (ShouldProcess($"Connected Standby", action))
+                    string target = "Connected Standby";
+
+                    if (ShouldProcess(target, action))
                     {
                         bool success = SetConnectedStandby(ConnectedStandby.Value);
+
                         if (!success)
                         {
                             WriteError(new ErrorRecord(
@@ -83,6 +86,8 @@ namespace PowerPlanTools.Cmdlets
                                 ConnectedStandby.Value));
                             return;
                         }
+
+                        // Log verbose message
                         LoggingHelper.LogVerbose(this, $"Successfully {action.ToLower()}d Connected Standby.");
                     }
                 }
@@ -91,9 +96,12 @@ namespace PowerPlanTools.Cmdlets
                 if (FastStartup.HasValue)
                 {
                     string action = FastStartup.Value ? "Enable" : "Disable";
-                    if (ShouldProcess($"Fast Startup", action))
+                    string target = "Fast Startup";
+
+                    if (ShouldProcess(target, action))
                     {
                         bool success = SetFastStartup(FastStartup.Value);
+
                         if (!success)
                         {
                             WriteError(new ErrorRecord(
@@ -103,6 +111,8 @@ namespace PowerPlanTools.Cmdlets
                                 FastStartup.Value));
                             return;
                         }
+
+                        // Log verbose message
                         LoggingHelper.LogVerbose(this, $"Successfully {action.ToLower()}d Fast Startup.");
                     }
                 }
@@ -111,9 +121,12 @@ namespace PowerPlanTools.Cmdlets
                 if (S0LowPowerIdle.HasValue)
                 {
                     string action = S0LowPowerIdle.Value ? "Enable" : "Disable";
-                    if (ShouldProcess($"S0 Low Power Idle", action))
+                    string target = "S0 Low Power Idle";
+
+                    if (ShouldProcess(target, action))
                     {
                         bool success = SetS0LowPowerIdle(S0LowPowerIdle.Value);
+
                         if (!success)
                         {
                             WriteError(new ErrorRecord(
@@ -123,6 +136,8 @@ namespace PowerPlanTools.Cmdlets
                                 S0LowPowerIdle.Value));
                             return;
                         }
+
+                        // Log verbose message
                         LoggingHelper.LogVerbose(this, $"Successfully {action.ToLower()}d S0 Low Power Idle.");
                     }
                 }
@@ -131,9 +146,12 @@ namespace PowerPlanTools.Cmdlets
                 if (Hibernate.HasValue)
                 {
                     string action = Hibernate.Value ? "Enable" : "Disable";
-                    if (ShouldProcess($"Hibernate", action))
+                    string target = "Hibernate";
+
+                    if (ShouldProcess(target, action))
                     {
                         bool success = SetHibernate(Hibernate.Value);
+
                         if (!success)
                         {
                             WriteError(new ErrorRecord(
@@ -143,6 +161,8 @@ namespace PowerPlanTools.Cmdlets
                                 Hibernate.Value));
                             return;
                         }
+
+                        // Log verbose message
                         LoggingHelper.LogVerbose(this, $"Successfully {action.ToLower()}d Hibernate.");
                     }
                 }
@@ -151,9 +171,12 @@ namespace PowerPlanTools.Cmdlets
                 if (HybridSleep.HasValue)
                 {
                     string action = HybridSleep.Value ? "Enable" : "Disable";
-                    if (ShouldProcess($"Hybrid Sleep", action))
+                    string target = "Hybrid Sleep";
+
+                    if (ShouldProcess(target, action))
                     {
                         bool success = SetHybridSleep(HybridSleep.Value);
+
                         if (!success)
                         {
                             WriteError(new ErrorRecord(
@@ -163,6 +186,8 @@ namespace PowerPlanTools.Cmdlets
                                 HybridSleep.Value));
                             return;
                         }
+
+                        // Log verbose message
                         LoggingHelper.LogVerbose(this, $"Successfully {action.ToLower()}d Hybrid Sleep.");
                     }
                 }
@@ -182,14 +207,14 @@ namespace PowerPlanTools.Cmdlets
         {
             // Get the active power plan
             Guid activePlanGuid = UseWmi ? WmiHelper.GetActivePowerPlanGuid() : PowerProfileHelper.GetActivePowerPlanGuid();
-            
+
             // Connected Standby is controlled by the "Disconnected Standby Mode" setting
             Guid settingGuid = new Guid("543e0f88-611b-4eab-bf9d-c9c38790c55e");
             Guid subGroupGuid = new Guid("5d3e9a59-e9d5-4b00-a6bd-ff34ff516548"); // System settings subgroup
-            
+
             // 0 = Disabled, 1 = Enabled
             uint value = enable ? 1u : 0u;
-            
+
             // Update the setting for both AC and DC
             if (UseWmi)
             {
@@ -211,10 +236,10 @@ namespace PowerPlanTools.Cmdlets
             try
             {
                 // Fast Startup is controlled via the registry
-                string command = enable ? 
-                    "powercfg /setacvalueindex SCHEME_CURRENT SUB_SLEEP HIBERNATEPOWERDOWN 1" : 
+                string command = enable ?
+                    "powercfg /setacvalueindex SCHEME_CURRENT SUB_SLEEP HIBERNATEPOWERDOWN 1" :
                     "powercfg /setacvalueindex SCHEME_CURRENT SUB_SLEEP HIBERNATEPOWERDOWN 0";
-                
+
                 // Execute the command
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = "cmd.exe";
@@ -225,7 +250,7 @@ namespace PowerPlanTools.Cmdlets
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
                 process.WaitForExit();
-                
+
                 return process.ExitCode == 0;
             }
             catch
@@ -243,14 +268,14 @@ namespace PowerPlanTools.Cmdlets
         {
             // Get the active power plan
             Guid activePlanGuid = UseWmi ? WmiHelper.GetActivePowerPlanGuid() : PowerProfileHelper.GetActivePowerPlanGuid();
-            
+
             // S0 Low Power Idle is controlled by the "Low Power S0 Idle Capability" setting
             Guid settingGuid = new Guid("4e4450b3-6179-4e91-b8f1-5bb9938f81a1");
             Guid subGroupGuid = new Guid("5d3e9a59-e9d5-4b00-a6bd-ff34ff516548"); // System settings subgroup
-            
+
             // 0 = Disabled, 1 = Enabled
             uint value = enable ? 1u : 0u;
-            
+
             // Update the setting for both AC and DC
             if (UseWmi)
             {
@@ -273,7 +298,7 @@ namespace PowerPlanTools.Cmdlets
             {
                 // Hibernate is controlled via powercfg
                 string command = enable ? "powercfg /hibernate on" : "powercfg /hibernate off";
-                
+
                 // Execute the command
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = "cmd.exe";
@@ -284,7 +309,7 @@ namespace PowerPlanTools.Cmdlets
                 process.StartInfo.RedirectStandardError = true;
                 process.Start();
                 process.WaitForExit();
-                
+
                 return process.ExitCode == 0;
             }
             catch
@@ -302,14 +327,14 @@ namespace PowerPlanTools.Cmdlets
         {
             // Get the active power plan
             Guid activePlanGuid = UseWmi ? WmiHelper.GetActivePowerPlanGuid() : PowerProfileHelper.GetActivePowerPlanGuid();
-            
+
             // Hybrid Sleep is controlled by the "Allow hybrid sleep" setting
             Guid settingGuid = new Guid("bd3b718a-0680-4d9d-8ab2-e1d2b4ac806d");
             Guid subGroupGuid = new Guid("238c9fa8-0aad-41ed-83f4-97be242c8f20"); // Sleep subgroup
-            
+
             // 0 = Disabled, 1 = Enabled
             uint value = enable ? 1u : 0u;
-            
+
             // Update the setting for both AC and DC
             if (UseWmi)
             {

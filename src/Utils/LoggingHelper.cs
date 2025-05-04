@@ -17,19 +17,26 @@ namespace PowerPlanTools.Utils
         /// <param name="total">Optional total for the counter.</param>
         public static void LogVerbose(PSCmdlet cmdlet, string message, int? counter = null, int? total = null)
         {
-            if (cmdlet.MyInvocation.BoundParameters.ContainsKey("Verbose") && 
+            // Only write verbose messages if the -Verbose parameter is specified
+            if (cmdlet.MyInvocation.BoundParameters.ContainsKey("Verbose") &&
                 cmdlet.MyInvocation.BoundParameters["Verbose"].Equals(true))
             {
+                // Format the message with timestamp
                 string timestamp = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff");
+                string formattedMessage;
+
                 if (counter.HasValue && total.HasValue)
                 {
                     string counterText = $"[{counter.Value}/{total.Value}]";
-                    cmdlet.WriteVerbose($"{timestamp} - {counterText} - {message}");
+                    formattedMessage = $"{timestamp} - {counterText} - {message}";
                 }
                 else
                 {
-                    cmdlet.WriteVerbose($"{timestamp} - {message}");
+                    formattedMessage = $"{timestamp} - {message}";
                 }
+
+                // Write the verbose message
+                cmdlet.WriteVerbose(formattedMessage);
             }
         }
     }

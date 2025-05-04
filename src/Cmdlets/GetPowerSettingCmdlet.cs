@@ -75,11 +75,7 @@ namespace PowerPlanTools.Cmdlets
         [Parameter]
         public SwitchParameter IncludeHidden { get; set; }
 
-        /// <summary>
-        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
-        /// </summary>
-        [Parameter]
-        public SwitchParameter UseWmi { get; set; }
+
 
         /// <summary>
         /// Processes the cmdlet.
@@ -94,7 +90,7 @@ namespace PowerPlanTools.Cmdlets
                 if (ParameterSetName == "ByPlanName")
                 {
                     // Find the plan by name
-                    var powerPlans = UseWmi ? WmiHelper.GetPowerPlans() : PowerProfileHelper.GetPowerPlans();
+                    var powerPlans = PowerProfileHelper.GetPowerPlans();
                     var plan = powerPlans.Find(p => p.Name.Equals(PlanName, StringComparison.OrdinalIgnoreCase));
 
                     if (plan == null)
@@ -116,15 +112,7 @@ namespace PowerPlanTools.Cmdlets
                 }
 
                 // Get power settings
-                List<PowerSetting> settings;
-                if (UseWmi)
-                {
-                    settings = WmiHelper.GetPowerSettings(planGuid, IncludeHidden);
-                }
-                else
-                {
-                    settings = PowerProfileHelper.GetPowerSettings(planGuid, IncludeHidden);
-                }
+                List<PowerSetting> settings = PowerProfileHelper.GetPowerSettings(planGuid, IncludeHidden);
 
                 // Filter settings
                 IEnumerable<PowerSetting> filteredSettings = settings;
@@ -147,6 +135,9 @@ namespace PowerPlanTools.Cmdlets
                 // Write output
                 foreach (PowerSetting setting in filteredSettings)
                 {
+                    // Always add possible values
+                    setting.PossibleValues = PowerProfileHelper.GetPowerSettingPossibleValues(setting.SettingGuid, setting.SubGroupGuid);
+
                     WriteObject(setting);
                 }
             }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using PowerPlanTools.Models;
@@ -12,6 +13,26 @@ namespace PowerPlanTools.Utils
     internal static class PowerProfileHelper
     {
         #region PowrProf.dll P/Invoke Declarations
+
+        [DllImport("PowrProf.dll")]
+        private static extern uint PowerReadPossibleValue(
+            IntPtr RootPowerKey,
+            ref Guid SchemeGuid,
+            ref Guid SubGroupOfPowerSettingGuid,
+            ref Guid PowerSettingGuid,
+            uint Type,
+            IntPtr Buffer,
+            ref uint BufferSize);
+
+        [DllImport("PowrProf.dll")]
+        private static extern uint PowerReadPossibleFriendlyName(
+            IntPtr RootPowerKey,
+            ref Guid SchemeGuid,
+            ref Guid SubGroupOfPowerSettingGuid,
+            ref Guid PowerSettingGuid,
+            uint Type,
+            IntPtr Buffer,
+            ref uint BufferSize);
 
         [DllImport("PowrProf.dll")]
         private static extern uint PowerEnumerate(
@@ -108,6 +129,12 @@ namespace PowerPlanTools.Utils
         private const uint ACCESS_SCHEME = 16;
         private const uint ACCESS_SUBGROUP = 17;
         private const uint ACCESS_INDIVIDUAL_SETTING = 18;
+
+        // Value types
+        private const uint REG_NONE = 0;
+        private const uint REG_SZ = 1;
+        private const uint REG_BINARY = 3;
+        private const uint REG_DWORD = 4;
 
         #endregion
 
@@ -341,16 +368,21 @@ namespace PowerPlanTools.Utils
             PowerReadACValue(IntPtr.Zero, ref planGuid, ref subGroupGuid, ref settingGuid, ref acType, ref acValue, ref acBufferSize);
             PowerReadDCValue(IntPtr.Zero, ref planGuid, ref subGroupGuid, ref settingGuid, ref dcType, ref dcValue, ref dcBufferSize);
 
+            // Get possible values for the setting
+            List<PowerSettingPossibleValue> possibleValues = GetPowerSettingPossibleValues(settingGuid, subGroupGuid);
+
             PowerSetting setting = new PowerSetting
             {
                 Alias = name,
                 SettingGuid = settingGuid,
                 SubGroupGuid = subGroupGuid,
+                SubGroupAlias = ArgumentCompleters.GetSubgroupAlias(subGroupGuid),
                 Description = description,
                 PluggedIn = acValue,
                 OnBattery = dcValue,
                 Units = GetPowerSettingUnits(settingGuid),
-                IsHidden = IsHiddenSetting(settingGuid)
+                IsHidden = IsHiddenSetting(settingGuid),
+                PossibleValues = possibleValues
             };
 
             return setting;
@@ -364,7 +396,7 @@ namespace PowerPlanTools.Utils
         private static string GetPowerSettingFriendlyName(Guid settingGuid)
         {
             // First check if the setting is in our known settings dictionary
-            string knownName = PowerSettingAliases.GetPowerSettingAlias(settingGuid);
+            string knownName = ArgumentCompleters.GetPowerSettingAlias(settingGuid);
             if (knownName != settingGuid.ToString())
             {
                 return knownName;
@@ -529,6 +561,259 @@ namespace PowerPlanTools.Utils
             }
 
             return Guid.Empty;
+        }
+
+        /// <summary>
+        /// Gets possible values for a power setting
+        /// </summary>
+        /// <param name="settingGuid">The GUID of the setting</param>
+        /// <param name="subGroupGuid">The GUID of the subgroup</param>
+        /// <returns>A list of possible values for the setting</returns>
+        public static List<PowerSettingPossibleValue> GetPowerSettingPossibleValues(Guid settingGuid, Guid subGroupGuid)
+        {
+            List<PowerSettingPossibleValue> possibleValues = new List<PowerSettingPossibleValue>();
+
+            try
+            {
+                // Get the active power scheme GUID
+                Guid schemeGuid = GetActivePowerPlanGuid();
+
+                // First, get the buffer size needed for possible values
+                uint bufferSize = 0;
+                uint result = PowerReadPossibleValue(
+                    IntPtr.Zero,
+                    ref schemeGuid,
+                    ref subGroupGuid,
+                    ref settingGuid,
+                    REG_DWORD,
+                    IntPtr.Zero,
+                    ref bufferSize
+                );
+
+                if (result != ERROR_SUCCESS && result != ERROR_MORE_DATA)
+                {
+                    // Not an enumeration type setting or other error
+                    // Add default values for common settings
+                    return GetDefaultPossibleValues(settingGuid);
+                }
+
+                if (bufferSize == 0 || bufferSize % 4 != 0)
+                {
+                    // Invalid buffer size
+                    return possibleValues;
+                }
+
+                // Allocate buffer for possible values
+                IntPtr valueBuffer = Marshal.AllocHGlobal((int)bufferSize);
+                try
+                {
+                    // Read possible values
+                    result = PowerReadPossibleValue(
+                        IntPtr.Zero,
+                        ref schemeGuid,
+                        ref subGroupGuid,
+                        ref settingGuid,
+                        REG_DWORD,
+                        valueBuffer,
+                        ref bufferSize
+                    );
+
+                    if (result != ERROR_SUCCESS)
+                    {
+                        return possibleValues;
+                    }
+
+                    // Get the number of possible values
+                    int valueCount = (int)bufferSize / 4; // 4 bytes per DWORD
+                    uint[] values = new uint[valueCount];
+
+                    // Copy values from buffer
+                    for (int i = 0; i < valueCount; i++)
+                    {
+                        values[i] = (uint)Marshal.ReadInt32(valueBuffer, i * 4);
+                    }
+
+                    // Now get the buffer size needed for friendly names
+                    bufferSize = 0;
+                    result = PowerReadPossibleFriendlyName(
+                        IntPtr.Zero,
+                        ref schemeGuid,
+                        ref subGroupGuid,
+                        ref settingGuid,
+                        REG_SZ,
+                        IntPtr.Zero,
+                        ref bufferSize
+                    );
+
+                    if (result != ERROR_SUCCESS && result != ERROR_MORE_DATA)
+                    {
+                        // Use numeric values as names
+                        for (int i = 0; i < valueCount; i++)
+                        {
+                            possibleValues.Add(new PowerSettingPossibleValue
+                            {
+                                FriendlyName = values[i].ToString(),
+                                ActualValue = values[i]
+                            });
+                        }
+                        return possibleValues;
+                    }
+
+                    // Allocate buffer for friendly names
+                    IntPtr nameBuffer = Marshal.AllocHGlobal((int)bufferSize);
+                    try
+                    {
+                        // Read friendly names
+                        result = PowerReadPossibleFriendlyName(
+                            IntPtr.Zero,
+                            ref schemeGuid,
+                            ref subGroupGuid,
+                            ref settingGuid,
+                            REG_SZ,
+                            nameBuffer,
+                            ref bufferSize
+                        );
+
+                        if (result != ERROR_SUCCESS)
+                        {
+                            // Use numeric values as names
+                            for (int i = 0; i < valueCount; i++)
+                            {
+                                possibleValues.Add(new PowerSettingPossibleValue
+                                {
+                                    FriendlyName = values[i].ToString(),
+                                    ActualValue = values[i]
+                                });
+                            }
+                            return possibleValues;
+                        }
+
+                        // Parse the multi-string buffer to get friendly names
+                        string multiString = Marshal.PtrToStringUni(nameBuffer);
+                        string[] names = multiString.Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+
+                        // Create the list of possible values
+                        for (int i = 0; i < Math.Min(values.Length, names.Length); i++)
+                        {
+                            possibleValues.Add(new PowerSettingPossibleValue
+                            {
+                                FriendlyName = names[i],
+                                ActualValue = values[i]
+                            });
+                        }
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(nameBuffer);
+                    }
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(valueBuffer);
+                }
+            }
+            catch
+            {
+                // Ignore errors and return empty list
+            }
+
+            return possibleValues;
+        }
+
+        /// <summary>
+        /// Gets default possible values for common power settings
+        /// </summary>
+        /// <param name="settingGuid">The GUID of the setting</param>
+        /// <returns>A list of possible values for the setting</returns>
+        private static List<PowerSettingPossibleValue> GetDefaultPossibleValues(Guid settingGuid)
+        {
+            List<PowerSettingPossibleValue> possibleValues = new List<PowerSettingPossibleValue>();
+
+            // Check for common power settings and provide default values
+            switch (settingGuid.ToString().ToLower())
+            {
+                // Lid close action
+                case "5ca83367-6e45-459f-a27b-476b1d01c936":
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Do nothing", ActualValue = 0 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Sleep", ActualValue = 1 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Hibernate", ActualValue = 2 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Shut down", ActualValue = 3 });
+                    break;
+
+                // Power button action
+                case "7648efa3-dd9c-4e3e-b566-50f929386280":
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Do nothing", ActualValue = 0 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Sleep", ActualValue = 1 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Hibernate", ActualValue = 2 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Shut down", ActualValue = 3 });
+                    break;
+
+                // Sleep button action
+                case "96996bc0-ad50-47ec-923b-6f41874dd9eb":
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Do nothing", ActualValue = 0 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Sleep", ActualValue = 1 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Hibernate", ActualValue = 2 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Shut down", ActualValue = 3 });
+                    break;
+
+                // Display brightness
+                case "aded5e82-b909-4619-9949-f5d71dac0bcb":
+                case "f1fbfde2-a960-4165-9f88-50667911ce96":
+                    for (uint i = 0; i <= 100; i += 5)
+                    {
+                        possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = $"{i}%", ActualValue = i });
+                    }
+                    break;
+
+                // Processor power management
+                case "bc5038f7-23e0-4960-96da-33abaf5935ec": // Maximum processor state
+                case "893dee8e-2bef-41e0-89c6-b55d0929964c": // Minimum processor state
+                    for (uint i = 0; i <= 100; i += 5)
+                    {
+                        possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = $"{i}%", ActualValue = i });
+                    }
+                    break;
+
+                // Critical battery action
+                case "637ea02f-bbcb-4015-8e2c-a1c7b9c0b546":
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Do nothing", ActualValue = 0 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Sleep", ActualValue = 1 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Hibernate", ActualValue = 2 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Shut down", ActualValue = 3 });
+                    break;
+
+                // Low battery action
+                case "d8742dcb-3e6a-4b3c-b3fe-374623cdcf06":
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Do nothing", ActualValue = 0 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Sleep", ActualValue = 1 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Hibernate", ActualValue = 2 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Shut down", ActualValue = 3 });
+                    break;
+
+                // Hard disk timeout
+                case "6738e2c4-e8a5-4a42-b16a-e040e769756e": // Hard disk timeout (AC)
+                case "80e3c60e-bb94-4ad8-bbe0-0d3195efc663": // Hard disk timeout (DC)
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Never", ActualValue = 0 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "1 minute", ActualValue = 60 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "2 minutes", ActualValue = 120 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "5 minutes", ActualValue = 300 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "10 minutes", ActualValue = 600 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "15 minutes", ActualValue = 900 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "20 minutes", ActualValue = 1200 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "30 minutes", ActualValue = 1800 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "45 minutes", ActualValue = 2700 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "1 hour", ActualValue = 3600 });
+                    break;
+
+                // Default case for other settings
+                default:
+                    // For boolean settings (common)
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "Off", ActualValue = 0 });
+                    possibleValues.Add(new PowerSettingPossibleValue { FriendlyName = "On", ActualValue = 1 });
+                    break;
+            }
+
+            return possibleValues;
         }
 
         /// <summary>

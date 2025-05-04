@@ -98,11 +98,9 @@ namespace PowerPlanTools.Cmdlets
         [Parameter]
         public SwitchParameter IncludeHidden { get; set; }
 
-        /// <summary>
-        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
-        /// </summary>
-        [Parameter]
-        public SwitchParameter UseWmi { get; set; }
+
+
+
 
         /// <summary>
         /// Processes the cmdlet.
@@ -112,16 +110,7 @@ namespace PowerPlanTools.Cmdlets
             try
             {
                 // Get all power plans or a specific plan
-                List<PowerPlan> powerPlans;
-
-                if (UseWmi)
-                {
-                    powerPlans = WmiHelper.GetPowerPlans();
-                }
-                else
-                {
-                    powerPlans = PowerProfileHelper.GetPowerPlans();
-                }
+                List<PowerPlan> powerPlans = PowerProfileHelper.GetPowerPlans();
 
                 // Filter by plan name or GUID if specified
                 if (!string.IsNullOrEmpty(PlanName))
@@ -158,16 +147,7 @@ namespace PowerPlanTools.Cmdlets
 
                 foreach (var plan in powerPlans)
                 {
-                    List<PowerSetting> planSettings;
-
-                    if (UseWmi)
-                    {
-                        planSettings = WmiHelper.GetPowerSettings(plan.Guid, true);
-                    }
-                    else
-                    {
-                        planSettings = PowerProfileHelper.GetPowerSettings(plan.Guid, true);
-                    }
+                    List<PowerSetting> planSettings = PowerProfileHelper.GetPowerSettings(plan.Guid, true);
 
                     // Add plan information to each setting
                     foreach (var setting in planSettings)
@@ -278,6 +258,15 @@ namespace PowerPlanTools.Cmdlets
                             setting.Alias = knownAlias;
                         }
                     }
+
+                    // Add subgroup alias if not already set
+                    if (string.IsNullOrEmpty(setting.SubGroupAlias))
+                    {
+                        setting.SubGroupAlias = ArgumentCompleters.GetSubgroupAlias(setting.SubGroupGuid);
+                    }
+
+                    // Always add possible values
+                    setting.PossibleValues = PowerProfileHelper.GetPowerSettingPossibleValues(setting.SettingGuid, setting.SubGroupGuid);
 
                     WriteObject(setting);
                 }

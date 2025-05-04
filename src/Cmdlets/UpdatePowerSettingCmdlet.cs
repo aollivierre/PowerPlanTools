@@ -211,7 +211,8 @@ namespace PowerPlanTools.Cmdlets
                 uint? dcValue = OnBattery != null ? Convert.ToUInt32(OnBattery) : (uint?)null;
 
                 // Confirm the action
-                if (!ShouldProcess($"Update setting '{settingName}' in power plan '{planName}'", "Update-PowerSetting"))
+                string actionMessage = $"Update setting '{settingName}' in power plan '{planName}'";
+                if (!ShouldProcess(actionMessage, "Update-PowerSetting"))
                 {
                     return;
                 }
@@ -237,6 +238,7 @@ namespace PowerPlanTools.Cmdlets
                     return;
                 }
 
+                // Log verbose message
                 LoggingHelper.LogVerbose(this, $"Setting '{settingName}' in power plan '{planName}' updated successfully.");
 
                 // Return the updated setting if requested

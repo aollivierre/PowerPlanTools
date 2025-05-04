@@ -52,11 +52,7 @@ namespace PowerPlanTools.Cmdlets
         [Parameter]
         public SwitchParameter Active { get; set; }
 
-        /// <summary>
-        /// <para type="description">Gets or sets whether to include power settings in the output.</para>
-        /// </summary>
-        [Parameter]
-        public SwitchParameter IncludeSettings { get; set; }
+
 
         /// <summary>
         /// <para type="description">Gets or sets whether to include hidden power settings in the output.</para>
@@ -64,11 +60,7 @@ namespace PowerPlanTools.Cmdlets
         [Parameter]
         public SwitchParameter IncludeHidden { get; set; }
 
-        /// <summary>
-        /// <para type="description">Gets or sets whether to use WMI instead of PowrProf.dll.</para>
-        /// </summary>
-        [Parameter]
-        public SwitchParameter UseWmi { get; set; }
+
 
         /// <summary>
         /// Processes the cmdlet.
@@ -79,15 +71,8 @@ namespace PowerPlanTools.Cmdlets
             {
                 List<PowerPlan> powerPlans;
 
-                // Get power plans using either PowrProf.dll (default) or WMI
-                if (UseWmi)
-                {
-                    powerPlans = WmiHelper.GetPowerPlans();
-                }
-                else
-                {
-                    powerPlans = PowerProfileHelper.GetPowerPlans();
-                }
+                // Get power plans using PowerProfileHelper
+                powerPlans = PowerProfileHelper.GetPowerPlans();
 
                 // Filter by name, GUID, or active status
                 List<PowerPlan> filteredPlans = new List<PowerPlan>();
@@ -100,17 +85,13 @@ namespace PowerPlanTools.Cmdlets
 
                     if (nameMatch && guidMatch && activeMatch)
                     {
-                        // Include settings if requested
-                        if (IncludeSettings)
+                        // Always include settings
+                        plan.Settings = PowerProfileHelper.GetPowerSettings(plan.Guid, IncludeHidden);
+
+                        // Always include possible values
+                        foreach (var setting in plan.Settings)
                         {
-                            if (UseWmi)
-                            {
-                                plan.Settings = WmiHelper.GetPowerSettings(plan.Guid, IncludeHidden);
-                            }
-                            else
-                            {
-                                plan.Settings = PowerProfileHelper.GetPowerSettings(plan.Guid, IncludeHidden);
-                            }
+                            setting.PossibleValues = PowerProfileHelper.GetPowerSettingPossibleValues(setting.SettingGuid, setting.SubGroupGuid);
                         }
 
                         filteredPlans.Add(plan);

@@ -4,10 +4,12 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
 
 ## Features
 
-* Native power plan and setting manipulation using WMI and PowrProf.dll (no powercfg.exe)
-* Full alias support for known power setting GUIDs
+* Native power plan and setting manipulation using Windows Power Management API (no powercfg.exe)
+* Full alias support for all known power setting GUIDs
+* Comprehensive subgroup alias mapping for better organization
+* Automatic inclusion of possible values for power settings
 * Optional raw GUID input for advanced use
-* Tab-completion for PlanName, SettingAlias, and SettingGuid
+* Tab-completion for PlanName, SettingAlias, SubGroupAlias, and SettingGuid
 * Export/Import of power plans using native API (JSON, CSV, or XML formats)
 * Advanced search capabilities with regex and wildcard pattern support
 * Power plan statistics over time using event logs
@@ -19,7 +21,14 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
 
 ## Installation
 
-### Option 1: Install from GitHub Release
+### Option 1: Install from PowerShell Gallery
+
+```powershell
+# Install the module from PowerShell Gallery
+Install-Module -Name PowerPlanTools -Scope CurrentUser
+```
+
+### Option 2: Install from GitHub Release
 
 1. Download the latest release ZIP file from the [Releases page](https://github.com/Grace-Solutions/PowerPlanTools/releases)
 2. Extract the ZIP file to a temporary location
@@ -28,7 +37,7 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
    - Create a PowerPlanTools folder if it doesn't exist
    - Copy all module files to the correct location
 
-### Option 2: Manual Installation
+### Option 3: Manual Installation
 
 1. Download the latest release ZIP file from the [Releases page](https://github.com/Grace-Solutions/PowerPlanTools/releases)
 2. Extract the ZIP file to a temporary location
@@ -36,7 +45,7 @@ PowerPlanTools is a PowerShell Binary Module for native management of Windows Po
    - `$env:USERPROFILE\Documents\WindowsPowerShell\Modules\` (for current user)
    - `$env:ProgramFiles\WindowsPowerShell\Modules\` (for all users, requires admin)
 
-### Option 3: Install from Module Folder
+### Option 4: Install from Module Folder
 
 ```powershell
 # Clone the repository
@@ -48,7 +57,7 @@ $modulePath = "$env:USERPROFILE\Documents\WindowsPowerShell\Modules"
 Copy-Item -Path ".\Module\PowerPlanTools" -Destination $modulePath -Recurse -Force
 ```
 
-### Option 4: Build from Source
+### Option 5: Build from Source
 
 ```powershell
 # Clone the repository
@@ -72,7 +81,10 @@ Import-Module PowerPlanTools
 Get-PowerPlan
 
 # Get details about the current power plan
-Get-PowerPlan -Current
+Get-PowerPlan -Active
+
+# Get a power plan with all its settings (settings are always included)
+Get-PowerPlan -Name "Balanced"
 
 # Find power settings related to display
 Find-PowerSetting -SearchString "display"
@@ -83,11 +95,21 @@ Find-PowerSetting -SearchString "^processor.*state$" -Regex
 # Find power settings using wildcard pattern
 Find-PowerSetting -SearchString "USB*suspend*" -Wildcard
 
+# Find power settings in a specific subgroup
+Find-SubGroup -Name "*processor*"
+Find-PowerSetting -SearchString "processor" | Where-Object { $_.SubGroupAlias -eq "Processor Power Management" }
+
 # Export a power plan to JSON
-Export-PowerSettings -PlanName "Balanced" -Path "C:\Temp\BalancedPlan.json"
+Export-PowerSettings -Name "Balanced" -Path "C:\Temp\BalancedPlan.json"
 
 # Import power settings from a file
-Import-PowerSettings -Path "C:\Temp\BalancedPlan.json" -PlanName "Custom Plan" -CreateIfNotExists
+Import-PowerSettings -Path "C:\Temp\BalancedPlan.json" -Name "Custom Plan" -CreateIfNotExists
+
+# Get power state settings
+Get-PowerState
+
+# Set power state settings
+Set-PowerState -EnableHibernate $true
 ```
 
 ## Available Cmdlets
@@ -103,12 +125,17 @@ Import-PowerSettings -Path "C:\Temp\BalancedPlan.json" -PlanName "Custom Plan" -
 - `Get-PowerSetting` - Gets power settings for a plan
 - `Update-PowerSetting` - Updates a power setting value
 - `Find-PowerSetting` - Searches for power settings by name, description, or GUID
+- `Find-SubGroup` - Searches for power setting subgroups by name or GUID
 - `Export-PowerSettings` - Exports power settings to a file (JSON, CSV, XML)
 - `Import-PowerSettings` - Imports power settings from a file
 
 ### Analysis and Comparison
 - `Compare-PowerPlans` - Compares settings between power plans
 - `Get-PowerPlanStatistic` - Gets power plan usage statistics
+
+### Power State Management
+- `Get-PowerState` - Gets the current power state settings
+- `Set-PowerState` - Configures power state settings like hibernation, connected standby, etc.
 
 ## Documentation
 

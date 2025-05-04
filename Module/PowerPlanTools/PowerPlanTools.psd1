@@ -3,7 +3,7 @@
     RootModule = 'lib\PowerPlanTools.dll'
 
     # Version number of this module.
-    ModuleVersion = '2025.05.02.1542'
+    ModuleVersion = '2025.05.03.1730'
 
     # Supported PSEditions
     CompatiblePSEditions = @('Desktop', 'Core')
@@ -67,6 +67,7 @@
         'Compare-PowerPlans',
         'Export-PowerSettings',
         'Find-PowerSetting',
+        'Find-SubGroup',
         'Get-PowerPlan',
         'Get-PowerPlanStatistic',
         'Get-PowerSetting',
@@ -77,6 +78,7 @@
         'Reset-PowerPlanDefaults',
         'Set-PowerPlan',
         'Set-PowerState',
+        'Test-PowerPlanTools',
         'Update-PowerSetting'
     )
 
@@ -118,8 +120,17 @@
 - Renamed Export-PowerSetting to Export-PowerSettings for consistency (plural form)
 - Added automatic directory creation for export paths
 - Changed _IsActive property to IsActive for better naming convention
-- Made UsePowrProf opt-out instead of opt-in (renamed to UseWmi)
 - Added Get-PowerState and Set-PowerState cmdlets for managing power state settings
+- Improved power setting GUID-to-alias mapping for better readability
+- Added comprehensive power setting aliases for all known power settings
+- Enhanced subgroup GUID-to-alias mapping for better organization
+- Added Find-SubGroup cmdlet to search for power subgroups
+- Added SubGroupAlias property to PowerSetting class
+- Fixed duplicate verbose messages in cmdlets that use ShouldProcess
+- Always include settings when getting power plans (no opt-in required)
+- Always include possible values for power settings with FriendlyName and ActualValue properties
+- Completely removed WMI usage in favor of Windows Power Management API
+- Added default possible values for common power settings
 '@
         }
     }
